@@ -1,5 +1,5 @@
 (ns frontend.components.left-sidebar
-  "App left sidebar"
+  "App left sidebar – research IDE edition"
   (:require [clojure.string :as string]
             [frontend.components.block :as block]
             [frontend.components.dnd :as dnd-component]
@@ -167,6 +167,69 @@
     :graph-view :nav/graph-view
     :tag/tasks :nav/tasks
     :tag/assets :nav/assets))
+
+;; ---------------------------------------------------------------------------
+;; Research IDE – sidebar section
+;; ---------------------------------------------------------------------------
+
+(hsx/defc research-navigation
+  [{:keys [route-name]}]
+  (let [research-routes #{:research/home :research/ideation :research/methods
+                          :research/validation :research/writing
+                          :research/paper-search :research/graph}
+        active-research? (contains? research-routes route-name)]
+    (sidebar-content-group
+     [:a.wrap-th
+      {:href (rfe/href :research/home)}
+      [:span.flex.items-center.gap-1.5
+       (shui/tabler-icon "microscope" {:size 14 :class "opacity-70"})
+       [:strong.flex-1 (t :research/sidebar-section)]]]
+     {:class "research-nav"
+      :collapsable? true}
+     [:div.flex.flex-col.mt-1
+      (sidebar-item
+       {:class "research-hub-nav"
+        :title (t :research/hub)
+        :icon "home-2"
+        :href (rfe/href :research/home)
+        :active (= route-name :research/home)})
+      (sidebar-item
+       {:class "research-ideation-nav"
+        :title (t :research/stage-ideation)
+        :icon "bulb"
+        :href (rfe/href :research/ideation)
+        :active (= route-name :research/ideation)})
+      (sidebar-item
+       {:class "research-methods-nav"
+        :title (t :research/stage-methods)
+        :icon "flask"
+        :href (rfe/href :research/methods)
+        :active (= route-name :research/methods)})
+      (sidebar-item
+       {:class "research-validation-nav"
+        :title (t :research/stage-validation)
+        :icon "checkup-list"
+        :href (rfe/href :research/validation)
+        :active (= route-name :research/validation)})
+      (sidebar-item
+       {:class "research-writing-nav"
+        :title (t :research/stage-writing)
+        :icon "writing"
+        :href (rfe/href :research/writing)
+        :active (= route-name :research/writing)})
+      (sidebar-item
+       {:class "research-paper-search-nav"
+        :title (t :research/search-papers)
+        :icon "books"
+        :href (rfe/href :research/paper-search)
+        :active (= route-name :research/paper-search)})
+      (sidebar-item
+       {:class "research-graph-nav"
+        :title (t :research.graph/title)
+        :icon "circles-relation"
+        :href (rfe/href :research/graph)
+        :active (= route-name :research/graph)})])))
+
 
 (hsx/defc sidebar-navigations-edit-content
   [{:keys [_id navs checked-navs set-checked-navs!]}]
@@ -439,6 +502,10 @@
         ;; sidebar graphs
         (when (not config/publishing?)
           (sidebar-graphs))
+
+        ;; Research IDE navigation
+        (when (not config/publishing?)
+          (research-navigation {:route-name route-name}))
 
         ;; sidebar sticky navigations
         (sidebar-navigations

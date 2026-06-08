@@ -1971,4 +1971,95 @@
  :zotero/imported-file-warning "This is a Zotero imported file, set Zotero data directory to open the file in Logseq."
  :zotero/linked-file-warning "This is a Zotero linked file, set Zotero linked attachment base directory to open the file in Logseq."
  :zotero/notes "Notes"
+
+ ;; -------------------------------------------------------------------------
+ ;; Research IDE
+ ;; -------------------------------------------------------------------------
+
+ :research/app-name "Research IDE"
+ :research/tagline "AI-powered research platform — from idea to publication"
+ :research/sidebar-section "Research"
+ :research/hub "Research Hub"
+ :research/quick-access "Quick Access"
+
+ ;; Workflow stages
+ :research/stage-ideation "Ideation"
+ :research/stage-ideation-desc "Capture and develop research ideas with AI"
+ :research/stage-methods "Methods"
+ :research/stage-methods-desc "Design your research methodology"
+ :research/stage-validation "Validation"
+ :research/stage-validation-desc "Validate hypotheses and review results"
+ :research/stage-writing "Writing"
+ :research/stage-writing-desc "Draft and refine your research outputs"
+
+ ;; Quick access items
+ :research/literature-notes "Literature Notes"
+ :research/hypotheses "Hypotheses"
+ :research/datasets "Datasets"
+ :research/search-papers "Search Papers"
+
+ ;; Ideation
+ :research.ideation/subtitle "Capture ideas, explore related work, and develop research questions"
+ :research.ideation/new-idea-label "New Research Idea"
+ :research.ideation/new-idea-placeholder "Describe your research idea, question, or observation…"
+ :research.ideation/create-note "Create Note"
+ :research.ideation/workflow-title "Explore & Develop"
+ :research.ideation/card-literature "Search Literature"
+ :research.ideation/card-literature-desc "Find relevant papers on Semantic Scholar and arXiv"
+ :research.ideation/card-graph "Knowledge Graph"
+ :research.ideation/card-graph-desc "Visualize connections between your notes and papers"
+ :research.ideation/card-hypotheses "Hypotheses"
+ :research.ideation/card-hypotheses-desc "Formalize testable hypotheses from your ideas"
+ :research.ideation/card-related "Related Work"
+ :research.ideation/card-related-desc "Track how your ideas relate to existing research"
+
+ ;; Paper search
+ :research.paper/search-hint "Search Semantic Scholar's open database of 200M+ academic papers"
+ :research.paper/search-placeholder "Search by title, author, topic, or keywords…"
+ :research.paper/search-btn "Search"
+ :research.paper/import "Import"
+ :research.paper/import-as-note "Import paper as structured note"
+ :research.paper/search-error "Search failed. Check your connection and try again."
+ :research.paper/search-empty-state "Search for papers to get started"
+ :research.paper/no-results "No papers found. Try different keywords."
+ :research.paper/imported-success "Paper imported as a structured note"
+
+ ;; AI assistant
+ :research.ai/panel-title "AI Research Assistant"
+ :research.ai/assist "AI Assist"
+ :research.ai/mode-papers "Paper Suggestions"
+ :research.ai/mode-hypothesis "Hypotheses"
+ :research.ai/mode-methods "Methodology"
+ :research.ai/mode-writing "Writing Feedback"
+ :research.ai/context-label "Context (leave blank to use current page)"
+ :research.ai/context-placeholder "Paste text or describe your research context…"
+ :research.ai/run-btn "Generate"
+ :research.ai/thinking "Thinking…"
+ :research.ai/no-context-fallback "Help me with my research."
+ :research.ai/empty-response "No response received."
+ :research.ai/call-error "AI call failed. Is your LLM endpoint running?"
+
+ ;; Research graph
+ :research.graph/title "Research Knowledge Graph"
+ :research.graph/filter-by "Show:"
+ :research.graph/filter-all "All"
+ :research.graph/filter-papers "Papers"
+ :research.graph/filter-ideas "Ideas"
+ :research.graph/filter-methods "Methods"
+ :research.graph/filter-data "Data"
+ :research.graph/recalculate "Recalculate"
+ :research.graph/suggest-connections "Suggest Connections"
+ :research.graph/find-related-papers "Find Related Papers"
+ :research.graph/add-to-ideation "Add to Ideation"
+ :research.graph/backlinks "Backlinks"
+ :research.graph/references "references"
+ :research.graph/no-references "No references yet"
+
+ ;; Writing
+ :research.writing/subtitle "Compose research outputs with AI-assisted structure and feedback"
+ :research.writing/choose-template "Choose a document template"
+ :research.writing/outline "Outline"
+ :research.writing/words "words"
+ :research.writing/chars "characters"
+ :research.writing/editor-hint "Your note is open in the main editor. Use the outline panel to navigate sections."
 }

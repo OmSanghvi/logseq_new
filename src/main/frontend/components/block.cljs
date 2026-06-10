@@ -27,6 +27,7 @@
             [frontend.components.property.value :as pv]
             [frontend.components.query :as query]
             [frontend.components.query.builder :as query-builder-component]
+            [frontend.components.research.inline-panel :as research-inline]
             [frontend.components.select :as select]
             [frontend.components.svg :as svg]
             [frontend.config :as config]
@@ -3301,7 +3302,19 @@
           (when-not (or (:block-ref? config) (:table? config) (:gallery-view? config)
                         (:property? config))
             (when (seq (:block/tags block))
-              (tags-cp (assoc config :block/uuid (:block/uuid block)) block)))])]]]))
+              (tags-cp (assoc config :block/uuid (:block/uuid block)) block)))])]]
+
+     ;; Inline research panel — appears natively below block content when
+     ;; the block text contains research-relevant keywords or patterns.
+     ;; Only shown for regular (non-table, non-property, non-embed) blocks.
+     (when (and (not (:table? config))
+                (not (:property? config))
+                (not (:block-ref? config))
+                (not (:embed? config))
+                (not (some? (:block/name block)))
+                (not edit?))
+       (research-inline/inline-research-panel
+        {:block-text (or (:block/title block) "")}))]))
 
 (defn non-dragging?
   [e]

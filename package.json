@@ -116,7 +116,9 @@
     "ios:dev": "cross-env PLATFORM=ios gulp cap",
     "android:dev": "cross-env PLATFORM=android gulp cap",
     "ui:build": "pnpm --dir packages/ui install",
-    "postinstall": "pnpm ui:build"
+    "postinstall": "pnpm ui:build",
+    "kova:build": "pnpm --dir packages/kova install --frozen-lockfile && pnpm --dir packages/kova run build",
+    "kova:dev": "pnpm --dir packages/kova install && pnpm --dir packages/kova run dev"
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "^8.0.0",

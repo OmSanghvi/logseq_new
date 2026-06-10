@@ -347,6 +347,7 @@
  :command.go/flashcards "Toggle flashcards"
  :command.go/forward "Forwards"
  :command.go/graph-view "Go to graph view"
+ :command.go/research "Go to Research IDE"
  :command.go/home "Go to home"
  :command.go/journals "Go to journals"
  :command.go/keyboard-shortcuts "Go to keyboard shortcuts"
@@ -2062,4 +2063,17 @@
  :research.writing/words "words"
  :research.writing/chars "characters"
  :research.writing/editor-hint "Your note is open in the main editor. Use the outline panel to navigate sections."
+
+ ;; KOVA panel
+ :research.kova/llm-config-title "AI Model Configuration"
+ :research.kova/llm-endpoint "LLM endpoint"
+ :research.kova/llm-model "Model name"
+ :research.kova/llm-api-key "API key"
+ :research.kova/llm-save "Save"
+ :research.kova/llm-saved "Saved!"
+
+ ;; Inline research panel (appears below blocks)
+ :research.inline/related-title "Related research"
+ :research.inline/dismiss "Dismiss"
+ :research.inline/search-scholar "Search Semantic Scholar"
 }

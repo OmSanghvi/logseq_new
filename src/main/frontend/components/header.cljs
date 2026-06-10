@@ -52,6 +52,21 @@
    (t :nav/home)
    {:trigger-props {:as-child true}}))
 
+(hsx/defc research-button
+  "Toolbar button that navigates to the Research IDE."
+  []
+  (let [route-name (state/get-current-route)]
+    (ui/tooltip
+     (shui/button-ghost-icon
+      :microscope
+      {:class    (when (#{:research/home :research/ideation :research/paper-search
+                          :research/graph :research/writing :research/methods
+                          :research/validation} route-name)
+                   "is-active text-accent")
+       :on-click #(route-handler/redirect-to-research!)})
+     (t :research/sidebar-section)
+     {:trigger-props {:as-child true}})))
+
 (defn current-local-uploadable-graph
   []
   (let [current-repo (state/get-current-repo)]
@@ -489,6 +504,10 @@
        (toolbar-dots-menu {:t            t
                            :current-repo current-repo
                            :default-home default-home})
+
+       ;; Research IDE button — opens KOVA graph in right sidebar
+       (when (and current-repo (not (mobile-util/native-platform?)))
+         (research-button))
 
        (sidebar/toggle)
 

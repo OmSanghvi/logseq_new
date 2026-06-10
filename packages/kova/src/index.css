@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+/* ── KOVA design tokens ──────────────────────────────────────────────────────
+   Inherit from logseq's CSS custom properties where possible,
+   fall back to KOVA-specific dark defaults.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root,
+kova-app,
+.kova-app {
+  /* Surface colours */
+  --kova-bg:      var(--ls-primary-background-color, #1e1e2e);
+  --kova-surface: var(--ls-secondary-background-color, #252535);
+  --kova-raised:  var(--ls-tertiary-background-color, #2d2d40);
+
+  /* Text colours */
+  --kova-text:    var(--ls-primary-text-color,  #cdd6f4);
+  --kova-weak:    var(--ls-secondary-text-color, #a6adc8);
+  --kova-weaker:  var(--ls-tertiary-text-color,  #6c7086);
+
+  /* Accent */
+  --kova-accent:  var(--ls-link-text-color, #89b4fa);
+
+  /* Borders */
+  --kova-border:  rgba(255, 255, 255, 0.10);
+}
+
+/* ── Base layout ─────────────────────────────────────────────────────────── */
+
+.kova-app {
+  font-family: var(--ls-font-family, ui-sans-serif, system-ui, sans-serif);
+  font-size:   13px;
+  background:  var(--kova-bg);
+  color:       var(--kova-text);
+  height:      100%;
+  width:       100%;
+}
+
+/* ── Shared primitives ───────────────────────────────────────────────────── */
+
+.kova-input {
+  width:            100%;
+  padding:          6px 10px;
+  border-radius:    6px;
+  background:       rgba(0, 0, 0, 0.25);
+  border:           1px solid var(--kova-border);
+  color:            var(--kova-text);
+  font-size:        12px;
+  outline:          none;
+  box-sizing:       border-box;
+  transition:       border-color 0.12s ease;
+}
+
+.kova-input:focus {
+  border-color: var(--kova-accent);
+}
+
+.kova-input::placeholder {
+  color: var(--kova-weaker);
+}
+
+.kova-btn {
+  padding:          5px 12px;
+  border-radius:    5px;
+  font-size:        12px;
+  cursor:           default;
+  background:       rgba(255, 255, 255, 0.06);
+  border:           1px solid var(--kova-border);
+  color:            var(--kova-text);
+  transition:       opacity 0.1s ease, background 0.1s ease;
+  white-space:      nowrap;
+}
+
+.kova-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.kova-btn:disabled {
+  opacity: 0.4;
+  cursor:  default;
+}
+
+.kova-btn-primary {
+  background: #7c3aed;
+  border:     1px solid #7c3aed;
+  color:      #fff;
+}
+
+.kova-btn-primary:hover:not(:disabled) {
+  background: #6d28d9;
+}
+
+/* ── Activity rail ───────────────────────────────────────────────────────── */
+
+.kova-rail {
+  background: var(--kova-bg);
+}
+
+/* ── Left panel ──────────────────────────────────────────────────────────── */
+
+.kova-left-panel {
+  background: var(--kova-surface);
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+
+.kova-toolbar {
+  background: var(--kova-bg);
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 2px; }
+
+/* ── Sigma graph canvas ──────────────────────────────────────────────────── */
+
+.sigma-container {
+  width:  100% !important;
+  height: 100% !important;
+}
+
+/* ── Confidence bar animation ────────────────────────────────────────────── */
+
+@keyframes kova-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.kova-fade-in { animation: kova-fade-in 0.15s ease; }
+
+/* ── Tailwind utilities needed that aren't in the scan ───────────────────── */
+
+.line-clamp-2 {
+  display:            -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow:           hidden;
+}

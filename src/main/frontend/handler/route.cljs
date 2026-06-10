@@ -47,6 +47,11 @@
   []
   (redirect! {:to :graph}))
 
+(defn redirect-to-research!
+  "Navigate to the Research Hub (/:research/home)."
+  []
+  (redirect! {:to :research/home}))
+
 (defn redirect-to-all-graphs
   []
   (redirect! {:to :graphs}))

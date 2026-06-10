@@ -128,7 +128,7 @@
       :ui/sidebar-open?                      false
       :ui/sidebar-width                      "40%"
       :ui/left-sidebar-open?                 (boolean (storage/get :ls-left-sidebar-open?))
-      :ui/theme                              (or (storage/get :ui/theme) "light")
+      :ui/theme                              (or (storage/get :ui/theme) "dark")
       :ui/system-theme?                      ((fnil identity (or util/mac? util/win32? false)) (storage/get :ui/system-theme?))
       :ui/custom-theme                       (or (storage/get :ui/custom-theme) {:light {:mode "light"} :dark {:mode "dark"}})
       :ui/wide-mode?                         (storage/get :ui/wide-mode)

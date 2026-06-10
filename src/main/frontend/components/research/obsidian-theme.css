@@ -1,0 +1,580 @@
+/* =============================================================================
+   RESEARCH IDE — Obsidian-style Theme
+   Replicates the exact visual language from Obsidian's dark UI:
+   - #1e1e1e base background
+   - #252525 sidebar background
+   - #2d2d2d elevated surfaces
+   - Inter / system-ui font
+   - Minimal borders (#3d3d3d)
+   - Subtle purple accent (#7c3aed / #a78bfa)
+   - White dots graph, grey edges
+   - File-tree left sidebar
+   - Tab bar for open notes
+   Applied globally via html[data-theme=dark] so it coexists with the
+   existing light/dark theme switch.
+   ============================================================================= */
+
+/* ── Core token overrides ─────────────────────────────────────────────────── */
+
+html[data-theme='dark'] {
+
+  /* Background layers — exactly Obsidian's stack */
+  --ls-primary-background-color:    #1e1e1e;   /* main canvas */
+  --ls-secondary-background-color:  #252525;   /* sidebar, panels */
+  --ls-tertiary-background-color:   #2d2d2d;   /* elevated cards */
+  --ls-quaternary-background-color: #363636;   /* hover states */
+  --left-sidebar-bg-color:          #252525;
+
+  /* Text */
+  --ls-primary-text-color:          #dcddde;   /* body text */
+  --ls-secondary-text-color:        #f0f0f0;   /* headings */
+  --ls-title-text-color:            #ffffff;
+  --ls-icon-color:                  #888;
+
+  /* Links & accents */
+  --ls-link-text-color:             #a78bfa;   /* Obsidian purple */
+  --ls-link-text-hover-color:       #c4b5fd;
+  --ls-link-ref-text-color:         #a78bfa;
+  --ls-link-ref-text-hover-color:   #c4b5fd;
+  --ls-tag-text-color:              #a78bfa;
+  --ls-active-primary-color:        #7c3aed;
+  --ls-active-secondary-color:      #a78bfa;
+
+  /* Borders */
+  --ls-border-color:           #3d3d3d;
+  --ls-secondary-border-color: #333;
+  --ls-tertiary-border-color:  rgba(255, 255, 255, 0.04);
+  --ls-guideline-color:        rgba(255, 255, 255, 0.04);
+
+  /* Selection */
+  --ls-selection-background-color: rgba(124, 58, 237, 0.25);
+  --ls-selection-text-color:       #f0f0f0;
+  --ls-block-highlight-color:      rgba(124, 58, 237, 0.12);
+
+  /* Bullet */
+  --ls-block-bullet-color:        rgba(255, 255, 255, 0.2);
+  --ls-block-bullet-border-color: #3a3a3a;
+
+  /* Scrollbar */
+  --ls-scrollbar-foreground-color:   rgba(255, 255, 255, 0.1);
+  --ls-scrollbar-background-color:   transparent;
+  --ls-scrollbar-thumb-hover-color:  rgba(255, 255, 255, 0.2);
+
+  /* Code */
+  --ls-page-inline-code-bg-color: #2d2d2d;
+  --ls-page-inline-code-color:    #e2b96a;
+
+  /* Blockquote */
+  --ls-page-blockquote-bg-color:     #252525;
+  --ls-page-blockquote-border-color: #7c3aed;
+
+  /* Radix/shadcn tokens  */
+  --background:   0 0% 11.8%;      /* #1e1e1e */
+  --foreground:   0 0% 86.3%;      /* #dcddde */
+  --card:         0 0% 14.5%;      /* #252525 */
+  --card-foreground: 0 0% 86.3%;
+  --muted:        0 0% 17.6%;      /* #2d2d2d */
+  --muted-foreground: 0 0% 55%;
+  --accent:       263 69% 55%;     /* #7c3aed */
+  --accent-foreground: 0 0% 100%;
+  --border:       0 0% 24%;        /* #3d3d3d */
+  --input:        0 0% 20%;
+  --ring:         263 69% 55%;
+  --primary:      263 69% 55%;
+  --primary-foreground: 0 0% 100%;
+}
+
+/* ── Typography ───────────────────────────────────────────────────────────── */
+
+html[data-theme='dark'] {
+  --ls-font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ls-page-text-size: 0.9375em;   /* 15px — Obsidian default */
+  --ls-page-title-size: 28px;
+}
+
+html[data-theme='dark'] body {
+  font-family: var(--ls-font-family);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header / title bar ───────────────────────────────────────────────────── */
+
+html[data-theme='dark'] .cp__header {
+  background-color: #1e1e1e;
+  border-bottom: 1px solid #2d2d2d;
+  box-shadow: none;
+  height: 2.75rem;
+}
+
+/* ── Left sidebar — Obsidian file tree style ─────────────────────────────── */
+
+html[data-theme='dark'] #left-sidebar {
+  border-right: 1px solid #2d2d2d;
+}
+
+html[data-theme='dark'] .left-sidebar-inner.as-container {
+  background-color: #252525;
+  border-right: 1px solid #2d2d2d;
+}
+
+/* Sidebar group headers — lighter, smaller caps like Obsidian */
+html[data-theme='dark'] .sidebar-content-group-inner > .hd {
+  background-color: #252525;
+  border-radius: 4px;
+}
+
+html[data-theme='dark'] .sidebar-content-group-inner > .hd .wrap-th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #666;
+  font-weight: 600;
+}
+
+html[data-theme='dark'] .sidebar-content-group-inner > .hd .wrap-th > strong {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Nav items — Obsidian file row style */
+html[data-theme='dark'] .left-sidebar-inner a.item {
+  border-radius: 4px;
+  height: 28px;
+  font-size: 13px;
+  padding-left: 8px;
+  color: #a0a0a0;
+  transition: background-color 0.08s ease, color 0.08s ease;
+}
+
+html[data-theme='dark'] .left-sidebar-inner a.item:hover,
+html[data-theme='dark'] .left-sidebar-inner a.item.active {
+  background-color: #2d2d2d;
+  color: #dcddde;
+}
+
+html[data-theme='dark'] .left-sidebar-inner a.item.active {
+  background-color: #3d3d3d;
+  color: #ffffff;
+}
+
+/* Favorite/recent page items */
+html[data-theme='dark'] .left-sidebar-inner .sidebar-content-group-inner > .bd ul li > a:first-of-type {
+  height: 26px;
+  font-size: 13px;
+  border-radius: 4px;
+  color: #a0a0a0;
+  padding: 0 8px;
+}
+
+html[data-theme='dark'] .left-sidebar-inner .sidebar-content-group-inner > .bd ul li > a:first-of-type:hover {
+  background-color: #2d2d2d;
+  color: #dcddde;
+}
+
+/* Page title in sidebar */
+html[data-theme='dark'] .left-sidebar-inner .page-title {
+  font-size: 13px;
+}
+
+/* Sidebar navigation section — research items inherit the same style */
+html[data-theme='dark'] .sidebar-content-group.research-nav a.item {
+  color: #a0a0a0;
+}
+
+html[data-theme='dark'] .sidebar-content-group.research-nav a.item:hover {
+  color: #dcddde;
+  background-color: #2d2d2d;
+}
+
+html[data-theme='dark'] .sidebar-content-group.research-nav a.item.active {
+  background-color: #3d3d3d;
+  color: #c4b5fd;  /* purple tint for active research items */
+}
+
+/* ── Main content area ────────────────────────────────────────────────────── */
+
+html[data-theme='dark'] #main-content-container {
+  background-color: #1e1e1e;
+}
+
+html[data-theme='dark'] .cp__sidebar-main-content .page {
+  padding-top: 28px;
+}
+
+/* Page title */
+html[data-theme='dark'] .ls-page-title h1,
+html[data-theme='dark'] .page-title {
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Block content */
+html[data-theme='dark'] .block-content {
+  color: #dcddde;
+  line-height: 1.65;
+}
+
+/* Links inside blocks */
+html[data-theme='dark'] .block-content a,
+html[data-theme='dark'] .block-content .page-ref {
+  color: #a78bfa;
+  text-decoration: none;
+}
+
+html[data-theme='dark'] .block-content a:hover,
+html[data-theme='dark'] .block-content .page-ref:hover {
+  text-decoration: underline;
+  color: #c4b5fd;
+}
+
+/* Tags — Obsidian pill style */
+html[data-theme='dark'] .block-content .tag {
+  color: #a78bfa;
+  font-size: 0.875em;
+}
+
+/* Headings */
+html[data-theme='dark'] h1.block-content,
+html[data-theme='dark'] .h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  border-bottom: 1px solid #2d2d2d;
+  padding-bottom: 0.25em;
+}
+
+html[data-theme='dark'] h2.block-content,
+html[data-theme='dark'] .h2 {
+  font-size: 1.3em;
+  font-weight: 600;
+  color: #f0f0f0;
+}
+
+html[data-theme='dark'] h3.block-content,
+html[data-theme='dark'] .h3 {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+/* Bullets — match Obsidian's subtle dots */
+html[data-theme='dark'] .bullet-container .bullet {
+  background-color: rgba(255, 255, 255, 0.18);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+/* Blockquote — purple left border */
+html[data-theme='dark'] blockquote {
+  border-left: 3px solid #7c3aed;
+  background: #252525;
+  padding: 0.75em 1em;
+  border-radius: 0 4px 4px 0;
+  color: #b0b0b0;
+  font-style: italic;
+}
+
+/* Code blocks */
+html[data-theme='dark'] pre,
+html[data-theme='dark'] .CodeMirror {
+  background-color: #1a1a1a !important;
+  border: 1px solid #3d3d3d;
+  border-radius: 6px;
+}
+
+html[data-theme='dark'] code {
+  background-color: #2d2d2d;
+  color: #e2b96a;
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+  font-size: 0.875em;
+}
+
+/* ── Right sidebar — Obsidian panel style ─────────────────────────────────── */
+
+html[data-theme='dark'] .cp__right-sidebar-inner,
+html[data-theme='dark'] .cp__right-sidebar-topbar {
+  background-color: #252525;
+  border-left: 1px solid #2d2d2d;
+}
+
+html[data-theme='dark'] .cp__right-sidebar .sidebar-item {
+  background-color: #252525;
+  border: none;
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .cp__right-sidebar .sidebar-item-header {
+  background: #2d2d2d !important;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+html[data-theme='dark'] .cp__right-sidebar-settings-btn {
+  font-size: 12px;
+  color: #888;
+  padding: 0 8px;
+  transition: color 0.1s ease;
+}
+
+html[data-theme='dark'] .cp__right-sidebar-settings-btn:hover {
+  color: #dcddde;
+}
+
+/* ── Graph view — Obsidian white-dot style ─────────────────────────────────── */
+
+html[data-theme='dark'] #global-graph {
+  background-color: #1e1e1e;
+}
+
+html[data-theme='dark'] .graph-root {
+  background-color: #1e1e1e;
+}
+
+/* Graph bottom toolbar */
+html[data-theme='dark'] .graph-settings-panel,
+html[data-theme='dark'] .graph-bottom-toolbar {
+  background-color: #252525;
+  border-top: 1px solid #2d2d2d;
+}
+
+html[data-theme='dark'] .graph-settings-group {
+  background-color: #252525;
+  border: 1px solid #2d2d2d;
+  border-radius: 6px;
+}
+
+html[data-theme='dark'] .graph-settings-group-header {
+  color: #a0a0a0;
+  font-size: 12px;
+}
+
+html[data-theme='dark'] .graph-tag-row {
+  color: #a0a0a0;
+  font-size: 12px;
+}
+
+html[data-theme='dark'] .graph-tag-row:hover,
+html[data-theme='dark'] .graph-tag-row.is-selected {
+  color: #dcddde;
+}
+
+/* ── Search & Command palette ─────────────────────────────────────────────── */
+
+html[data-theme='dark'] .cp__cmdk {
+  background-color: #252525 !important;
+  border: 1px solid #3d3d3d !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 8px !important;
+}
+
+html[data-theme='dark'] .cp__cmdk input {
+  background-color: transparent;
+  color: #dcddde;
+  font-size: 15px;
+}
+
+html[data-theme='dark'] .cp__cmdk .cmdk-item {
+  border-radius: 4px;
+  font-size: 13px;
+  color: #b0b0b0;
+}
+
+html[data-theme='dark'] .cp__cmdk .cmdk-item[data-selected='true'],
+html[data-theme='dark'] .cp__cmdk .cmdk-item:hover {
+  background-color: #2d2d2d;
+  color: #dcddde;
+}
+
+html[data-theme='dark'] .cp__cmdk .cmdk-group-heading {
+  font-size: 11px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Scrollbars — thin Obsidian style ─────────────────────────────────────── */
+
+html[data-theme='dark'] ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Selection ────────────────────────────────────────────────────────────── */
+
+html[data-theme='dark'] ::selection {
+  background: rgba(124, 58, 237, 0.3);
+  color: #f0f0f0;
+}
+
+/* ── Properties panel ────────────────────────────────────────────────────── */
+
+html[data-theme='dark'] .block-properties,
+html[data-theme='dark'] .page-properties {
+  background-color: #252525;
+  border: 1px solid #2d2d2d;
+  border-radius: 6px;
+}
+
+/* ── Inline research panel — Obsidian-style connected hints ──────────────── */
+
+html[data-theme='dark'] .research-inline-panel {
+  border-color: #3d3d3d;
+  background: #252525;
+}
+
+html[data-theme='dark'] .research-inline-header {
+  color: #555;
+}
+
+html[data-theme='dark'] .research-inline-chip {
+  border-color: #3d3d3d;
+  background: #2d2d2d;
+  color: #a0a0a0;
+}
+
+html[data-theme='dark'] .research-inline-chip:hover {
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+  color: #c4b5fd;
+}
+
+html[data-theme='dark'] .research-inline-chip--scholar {
+  border-color: rgba(167, 139, 250, 0.3);
+  color: #a78bfa;
+}
+
+html[data-theme='dark'] .research-inline-chip--scholar:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: #7c3aed;
+  color: #c4b5fd;
+}
+
+/* ── Research sidebar nav — matches Obsidian file tree ─────────────────────── */
+
+html[data-theme='dark'] .research-nav .sidebar-content-group-inner > .hd .wrap-th {
+  color: #666;
+}
+
+/* ── Research home tiles ─────────────────────────────────────────────────── */
+
+html[data-theme='dark'] .research-stage-card {
+  border-color: #3d3d3d;
+  background: #252525;
+}
+
+html[data-theme='dark'] .research-stage-card:hover {
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.05);
+}
+
+/* ── Paper search ─────────────────────────────────────────────────────────── */
+
+html[data-theme='dark'] .paper-card {
+  background: #252525;
+  border-color: #3d3d3d;
+}
+
+html[data-theme='dark'] .paper-card:hover {
+  border-color: #4d4d4d;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Focus rings ──────────────────────────────────────────────────────────── */
+
+html[data-theme='dark'] :focus-visible {
+  outline: 2px solid rgba(124, 58, 237, 0.5);
+  outline-offset: 1px;
+}
+
+/* ── Checkbox — Obsidian tick style ──────────────────────────────────────── */
+
+html[data-theme='dark'] input[type='checkbox'] {
+  accent-color: #7c3aed;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+/* ── Tag pills ────────────────────────────────────────────────────────────── */
+
+html[data-theme='dark'] .block-content .tag::before {
+  content: '#';
+}
+
+/* ── Misc UI polish ───────────────────────────────────────────────────────── */
+
+html[data-theme='dark'] .ui__dropdown-trigger button,
+html[data-theme='dark'] .cp__header button.button {
+  color: #888;
+  transition: color 0.1s ease;
+}
+
+html[data-theme='dark'] .ui__dropdown-trigger button:hover,
+html[data-theme='dark'] .cp__header button.button:hover {
+  color: #dcddde;
+}
+
+/* Modal dialogs */
+html[data-theme='dark'] .ui__dialog-overlay {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(4px);
+}
+
+html[data-theme='dark'] .ui__dialog-content {
+  background-color: #252525 !important;
+  border: 1px solid #3d3d3d !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7) !important;
+  border-radius: 8px !important;
+}
+
+/* Tooltip */
+html[data-theme='dark'] [data-radix-popper-content-wrapper] [role='tooltip'],
+html[data-theme='dark'] .ui__tooltip {
+  background-color: #3d3d3d !important;
+  color: #dcddde !important;
+  font-size: 12px !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Dropdown menus */
+html[data-theme='dark'] [role='menu'],
+html[data-theme='dark'] .shui-dropdown-menu-content {
+  background-color: #252525 !important;
+  border: 1px solid #3d3d3d !important;
+  border-radius: 6px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+html[data-theme='dark'] [role='menuitem']:hover,
+html[data-theme='dark'] .shui-dropdown-menu-item:hover {
+  background-color: #2d2d2d !important;
+  color: #dcddde !important;
+}
+
+/* Notifications / toasts */
+html[data-theme='dark'] .notification-area {
+  background-color: #252525;
+  border: 1px solid #3d3d3d;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}

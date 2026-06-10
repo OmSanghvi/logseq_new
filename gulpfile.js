@@ -400,6 +400,15 @@ exports.electronMakerUnsigned = async () => {
 
 exports.cap = common.runCapWithLocalDevServerEntry
 exports.clean = common.clean
+
+// ── KOVA research mini-app ────────────────────────────────────────────────────
+// Builds packages/kova → static/js/kova/kova.js
+async function buildKova() {
+  await exec('pnpm --dir packages/kova install --frozen-lockfile', { cwd: __dirname })
+  await exec('pnpm --dir packages/kova run build', { cwd: __dirname })
+}
+exports.buildKova = buildKova
+
 exports.watch = gulp.series(
   common.syncResourceFile,
   common.syncAssetFiles, common.switchReactDevelopmentMode,
@@ -408,6 +417,6 @@ exports.watchMobile = gulp.series(
   common.syncResourceFile, common.syncAssetFiles,
   gulp.parallel(common.keepSyncResourceFile, common.keepSyncWorkersToMobile, css.watchMobileCSS))
 exports.build = gulp.series(common.clean, common.syncResourceFile,
-  common.syncAssetFiles, css.buildCSS)
+  common.syncAssetFiles, css.buildCSS, buildKova)
 exports.buildMobile = gulp.series(common.clean, common.syncResourceFile,
   common.syncAssetFiles, css.buildMobileCSS)

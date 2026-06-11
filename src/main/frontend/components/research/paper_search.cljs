@@ -1,5 +1,5 @@
 (ns frontend.components.research.paper-search
-  "Semantic Scholar paper search — find papers and import them as linked
+  "OpenAlex paper search — find papers and import them as linked
    Markdown pages that appear as nodes in the knowledge graph."
   (:require [clojure.string :as string]
             [frontend.context.i18n :refer [t]]
@@ -11,45 +11,77 @@
             [io.factorhouse.hsx.core :as hsx]))
 
 ;; ---------------------------------------------------------------------------
-;; Semantic Scholar API
+;; OpenAlex API
 ;; ---------------------------------------------------------------------------
+
+(defn- reconstruct-abstract [inverted-index]
+  (when (and inverted-index (map? inverted-index))
+    (let [pairs (for [[word positions] inverted-index
+                      pos positions]
+                  [pos (name word)])
+          sorted (sort-by first pairs)]
+      (string/join " " (map second sorted)))))
+
+(defn- paper-authors [authorships]
+  (->> (or authorships [])
+       (map #(get-in % [:author :display_name] ""))
+       (remove string/blank?)
+       (take 4)
+       (string/join ", ")))
 
 (defn search-papers! [query]
   (-> (js/fetch
-       (str "https://api.semanticscholar.org/graph/v1/paper/search"
-            "?query=" (js/encodeURIComponent query)
-            "&limit=12"
-            "&fields=paperId,title,abstract,authors,year,citationCount,externalIds,openAccessPdf,url,venue")
-       #js {:headers #js {"Accept" "application/json"}})
-      (p/then (fn [^js r] (when (.-ok r) (.json r))))
-      (p/then (fn [^js d] (when d (js->clj (.-data d) :keywordize-keys true))))
-      (p/catch (fn [_] nil))))
+       (str "https://api.openalex.org/works"
+            "?search=" (js/encodeURIComponent query)
+            "&per-page=12"
+            "&select=id,title,abstract_inverted_index,authorships,"
+            "publication_year,cited_by_count,doi,open_access,"
+            "primary_location,biblio")
+       #js {:headers #js {"Accept"     "application/json"
+                          "User-Agent" "LogseqResearch/1.0"}})
+      (p/then (fn [^js r]
+                (if (.-ok r)
+                  (.json r)
+                  (throw (js/Error. (str "HTTP " (.-status r)))))))
+      (p/then (fn [^js d]
+                (when d
+                  (let [results (aget d "results")]
+                    (when results
+                      (js->clj results :keywordize-keys true))))))
+      (p/catch (fn [e]
+                 (js/console.error "Search error:" e)
+                 nil))))
 
 ;; ---------------------------------------------------------------------------
 ;; Import paper as a linked page
 ;; ---------------------------------------------------------------------------
 
 (defn- import-paper! [paper]
-  (let [{:keys [title abstract authors year externalIds url openAccessPdf venue citationCount]} paper
-        doi        (get externalIds :DOI)
-        author-str (->> (or authors []) (map #(get % :name "")) (take 4) (string/join ", "))
-        page-title (str "Paper: " title (when year (str " (" year ")")))
-        content    (str "type:: [[Paper]]\n"
-                        "authors:: " author-str "\n"
-                        (when year    (str "year:: " year "\n"))
-                        (when doi     (str "doi:: " doi "\n"))
-                        (when venue   (str "venue:: " venue "\n"))
-                        (when citationCount (str "citations:: " citationCount "\n"))
-                        (when url     (str "url:: " url "\n"))
-                        (when-let [pdf (get openAccessPdf :url)]
-                          (str "pdf:: " pdf "\n"))
-                        "\n## Abstract\n\n"
-                        (or abstract "") "\n\n"
-                        "## Key insights\n\n- \n\n"
-                        "## Methods\n\n- \n\n"
-                        "## Relevance to my research\n\n- \n\n"
-                        "## Connections\n\n"
-                        "- Related to [[Research]]\n")]
+  (let [{:keys [title abstract_inverted_index authorships
+                publication_year cited_by_count doi
+                open_access primary_location]} paper
+        abstract    (reconstruct-abstract abstract_inverted_index)
+        author-str  (paper-authors authorships)
+        year        publication_year
+        url         (get-in primary_location [:landing_page_url])
+        pdf-url     (get-in open_access [:oa_url])
+        venue       (get-in primary_location [:source :display_name])
+        page-title  (str "Paper: " title (when year (str " (" year ")")))
+        content     (str "type:: [[Paper]]\n"
+                         "authors:: " author-str "\n"
+                         (when year         (str "year:: " year "\n"))
+                         (when doi          (str "doi:: " doi "\n"))
+                         (when venue        (str "venue:: " venue "\n"))
+                         (when cited_by_count (str "citations:: " cited_by_count "\n"))
+                         (when url          (str "url:: " url "\n"))
+                         (when pdf-url      (str "pdf:: " pdf-url "\n"))
+                         "\n## Abstract\n\n"
+                         (or abstract "") "\n\n"
+                         "## Key insights\n\n- \n\n"
+                         "## Methods\n\n- \n\n"
+                         "## Relevance to my research\n\n- \n\n"
+                         "## Connections\n\n"
+                         "- Related to [[Research]]\n")]
     (-> (page-handler/<create! page-title {:redirect? false :edit? false})
         (p/then (fn [_]
                   (notification/show! (str "Imported → [[" page-title "]]") :success)))
@@ -63,33 +95,39 @@
 (hsx/defc paper-card [{:keys [paper]}]
   (let [[importing? set-importing?!] (hooks/use-state false)
         [expanded?  set-expanded?!]  (hooks/use-state false)
-        {:keys [title abstract authors year citationCount url openAccessPdf externalIds venue]} paper
-        doi         (get externalIds :DOI)
-        author-str  (->> (or authors []) (map #(get % :name "")) (take 3) (string/join ", "))]
+        {:keys [title abstract_inverted_index authorships
+                publication_year cited_by_count doi
+                open_access primary_location]}  paper
+        abstract   (reconstruct-abstract abstract_inverted_index)
+        author-str (paper-authors authorships)
+        year       publication_year
+        url        (get-in primary_location [:landing_page_url])
+        pdf-url    (get-in open_access [:oa_url])
+        venue      (get-in primary_location [:source :display_name])]
     [:div.paper-card
      ;; Header
      [:div.paper-card-header
       [:div.paper-card-meta
        (when year [:span.paper-year year])
-       (when venue [:span.paper-venue venue])
-       (when (and citationCount (pos? citationCount))
-         [:span.paper-citations (str citationCount " citations")])]
+       (when (seq venue) [:span.paper-venue venue])
+       (when (and cited_by_count (pos? cited_by_count))
+         [:span.paper-citations (str cited_by_count " citations")])]
       [:div.paper-card-actions
-       (when-let [pdf-url (get openAccessPdf :url)]
+       (when (seq pdf-url)
          [:a.paper-action-link
           {:href pdf-url :target "_blank" :rel "noreferrer" :title "Open PDF"}
           (shui/tabler-icon "file-type-pdf" {:size 14})])
-       (when url
+       (when (seq url)
          [:a.paper-action-link
           {:href url :target "_blank" :rel "noreferrer" :title "Open paper"}
           (shui/tabler-icon "external-link" {:size 14})])]]
 
      ;; Title
-     [:h3.paper-title title]
+     [:h3.paper-title (or title "Untitled")]
      [:p.paper-authors author-str]
 
      ;; Abstract (expandable)
-     (when abstract
+     (when (seq abstract)
        [:div.paper-abstract-wrap
         [:p.paper-abstract
          {:class (when-not expanded? "line-clamp-3")}
@@ -99,7 +137,8 @@
            {:on-click #(set-expanded?! (not expanded?))}
            (if expanded? "Show less ↑" "Show more ↓")])])
 
-     (when doi [:p.paper-doi (str "DOI: " doi)])
+     (when (seq doi)
+       [:p.paper-doi (str "DOI: " doi)])
 
      ;; Import button
      (shui/button
@@ -134,7 +173,7 @@
                                      (set-results! (or papers []))
                                      (set-loading? false)))
                            (p/catch (fn [_]
-                                      (set-error! "Search failed. Check your connection.")
+                                      (set-error! "Search failed. Check your connection and try again.")
                                       (set-loading? false))))))]
 
     [:div.paper-search
@@ -142,7 +181,7 @@
      [:div.paper-search-header
       [:h1.paper-search-title "Search Papers"]
       [:p.paper-search-sub
-       "Search 200M+ papers from Semantic Scholar. Import any paper as a linked page in your graph."]]
+       "Search 250M+ papers from OpenAlex. Import any paper as a linked page in your graph."]]
 
      ;; Search bar
      [:div.paper-search-bar
@@ -179,5 +218,5 @@
        :else
        [:div.paper-results-grid
         (for [p results]
-          ^{:key (:paperId p)}
-          [paper-card {:paper p}])])]))
+          [:div {:key (:id p)}
+           [paper-card {:paper p}]])])]))

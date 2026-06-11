@@ -1,187 +1,183 @@
 (ns frontend.components.research.paper-search
-  "Paper search panel – queries Semantic Scholar open API and lets the user
-   import a paper as a structured note."
+  "Semantic Scholar paper search — find papers and import them as linked
+   Markdown pages that appear as nodes in the knowledge graph."
   (:require [clojure.string :as string]
             [frontend.context.i18n :refer [t]]
             [frontend.handler.notification :as notification]
             [frontend.handler.page :as page-handler]
-            [frontend.handler.route :as route-handler]
             [logseq.shui.hooks :as hooks]
             [logseq.shui.ui :as shui]
             [promesa.core :as p]
             [io.factorhouse.hsx.core :as hsx]))
 
 ;; ---------------------------------------------------------------------------
-;; Semantic Scholar open-access search (no API key required)
+;; Semantic Scholar API
 ;; ---------------------------------------------------------------------------
 
-(defn- semantic-scholar-url [query limit]
-  (str "https://api.semanticscholar.org/graph/v1/paper/search"
-       "?query=" (js/encodeURIComponent query)
-       "&limit=" (or limit 15)
-       "&fields=paperId,title,abstract,authors,year,citationCount,externalIds,openAccessPdf,url"))
-
-(defn search-papers!
-  "Returns a promise resolving to a seq of paper maps, or nil on error."
-  [query]
-  (-> (js/fetch (semantic-scholar-url query 15)
-                #js {:headers #js {"Accept" "application/json"}})
-      (p/then (fn [^js resp] (when (.-ok resp) (.json resp))))
-      (p/then (fn [^js data] (when data (js->clj (.-data data) :keywordize-keys true))))
+(defn search-papers! [query]
+  (-> (js/fetch
+       (str "https://api.semanticscholar.org/graph/v1/paper/search"
+            "?query=" (js/encodeURIComponent query)
+            "&limit=12"
+            "&fields=paperId,title,abstract,authors,year,citationCount,externalIds,openAccessPdf,url,venue")
+       #js {:headers #js {"Accept" "application/json"}})
+      (p/then (fn [^js r] (when (.-ok r) (.json r))))
+      (p/then (fn [^js d] (when d (js->clj (.-data d) :keywordize-keys true))))
       (p/catch (fn [_] nil))))
 
 ;; ---------------------------------------------------------------------------
-;; Paper card component
+;; Import paper as a linked page
 ;; ---------------------------------------------------------------------------
 
-(hsx/defc paper-card
-  [{:keys [paper on-import]}]
-  (let [{:keys [title abstract authors year citationCount url openAccessPdf externalIds]} paper
-        author-names (->> (or authors [])
-                          (map #(get % :name ""))
-                          (take 3)
-                          (string/join ", "))
-        doi (get externalIds :DOI)]
+(defn- import-paper! [paper]
+  (let [{:keys [title abstract authors year externalIds url openAccessPdf venue citationCount]} paper
+        doi        (get externalIds :DOI)
+        author-str (->> (or authors []) (map #(get % :name "")) (take 4) (string/join ", "))
+        page-title (str "Paper: " title (when year (str " (" year ")")))
+        content    (str "type:: [[Paper]]\n"
+                        "authors:: " author-str "\n"
+                        (when year    (str "year:: " year "\n"))
+                        (when doi     (str "doi:: " doi "\n"))
+                        (when venue   (str "venue:: " venue "\n"))
+                        (when citationCount (str "citations:: " citationCount "\n"))
+                        (when url     (str "url:: " url "\n"))
+                        (when-let [pdf (get openAccessPdf :url)]
+                          (str "pdf:: " pdf "\n"))
+                        "\n## Abstract\n\n"
+                        (or abstract "") "\n\n"
+                        "## Key insights\n\n- \n\n"
+                        "## Methods\n\n- \n\n"
+                        "## Relevance to my research\n\n- \n\n"
+                        "## Connections\n\n"
+                        "- Related to [[Research]]\n")]
+    (-> (page-handler/<create! page-title {:redirect? false :edit? false})
+        (p/then (fn [_]
+                  (notification/show! (str "Imported → [[" page-title "]]") :success)))
+        (p/catch (fn [e]
+                   (notification/show! (str "Import failed: " (.-message e)) :error))))))
+
+;; ---------------------------------------------------------------------------
+;; Paper card
+;; ---------------------------------------------------------------------------
+
+(hsx/defc paper-card [{:keys [paper]}]
+  (let [[importing? set-importing?!] (hooks/use-state false)
+        [expanded?  set-expanded?!]  (hooks/use-state false)
+        {:keys [title abstract authors year citationCount url openAccessPdf externalIds venue]} paper
+        doi         (get externalIds :DOI)
+        author-str  (->> (or authors []) (map #(get % :name "")) (take 3) (string/join ", "))]
     [:div.paper-card
-     [:div.flex.justify-between.gap-2
-      [:div.flex-1.min-w-0
-       [:h3.font-semibold.text-sm.text-foreground.leading-snug
-        (if url
-          [:a {:href url :target "_blank" :rel "noreferrer"} title]
-          title)]
-       [:p.text-xs.text-muted-foreground.mt-0.5
-        (string/join " · "
-          (remove string/blank?
-                  [author-names
-                   (when year (str year))
-                   (when (and citationCount (pos? citationCount))
-                     (str citationCount " citations"))]))]]
-      [:div.flex.gap-1.shrink-0
-       (when-let [pdf-url (get-in openAccessPdf [:url])]
-         [:a.inline-flex.items-center.justify-center.rounded.p-1.hover:bg-accent
-          {:href pdf-url :target "_blank" :rel "noreferrer"
-           :title "Open PDF"}
+     ;; Header
+     [:div.paper-card-header
+      [:div.paper-card-meta
+       (when year [:span.paper-year year])
+       (when venue [:span.paper-venue venue])
+       (when (and citationCount (pos? citationCount))
+         [:span.paper-citations (str citationCount " citations")])]
+      [:div.paper-card-actions
+       (when-let [pdf-url (get openAccessPdf :url)]
+         [:a.paper-action-link
+          {:href pdf-url :target "_blank" :rel "noreferrer" :title "Open PDF"}
           (shui/tabler-icon "file-type-pdf" {:size 14})])
-       (shui/button
-        {:variant :outline :size :sm
-         :title (t :research.paper/import-as-note)
-         :on-click #(on-import paper)}
-        (shui/tabler-icon "notes" {:size 14 :class "mr-1"})
-        (t :research.paper/import))]]
-     (when (and abstract (not (string/blank? abstract)))
-       [:p.text-xs.text-muted-foreground.mt-2.line-clamp-3 abstract])
-     (when doi
-       [:p.text-xs.text-blue-400.mt-1 (str "DOI: " doi)])]))
+       (when url
+         [:a.paper-action-link
+          {:href url :target "_blank" :rel "noreferrer" :title "Open paper"}
+          (shui/tabler-icon "external-link" {:size 14})])]]
+
+     ;; Title
+     [:h3.paper-title title]
+     [:p.paper-authors author-str]
+
+     ;; Abstract (expandable)
+     (when abstract
+       [:div.paper-abstract-wrap
+        [:p.paper-abstract
+         {:class (when-not expanded? "line-clamp-3")}
+         abstract]
+        (when (> (count abstract) 200)
+          [:button.paper-expand-btn
+           {:on-click #(set-expanded?! (not expanded?))}
+           (if expanded? "Show less ↑" "Show more ↓")])])
+
+     (when doi [:p.paper-doi (str "DOI: " doi)])
+
+     ;; Import button
+     (shui/button
+      {:size     :sm
+       :class    "paper-import-btn gap-1.5"
+       :disabled importing?
+       :on-click (fn []
+                   (set-importing?! true)
+                   (-> (import-paper! paper)
+                       (p/finally (fn [] (set-importing?! false)))))}
+      (if importing?
+        (shui/tabler-icon "loader-2" {:size 13 :class "animate-spin"})
+        (shui/tabler-icon "notes-plus" {:size 13}))
+      (if importing? "Importing…" "Import as page"))]))
 
 ;; ---------------------------------------------------------------------------
-;; Paper → note content generator
+;; Search view
 ;; ---------------------------------------------------------------------------
 
-(defn- paper->note-title [{:keys [title year]}]
-  (str "Paper: " title (when year (str " (" year ")"))))
-
-(defn- paper->first-block-text
-  [{:keys [title abstract authors year url externalIds citationCount]}]
-  (let [doi    (get externalIds :DOI)
-        author-list (->> (or authors []) (map #(get % :name "")) (string/join ", "))]
-    (string/join "\n"
-      (remove nil?
-        [(str "type:: [[Paper]]")
-         (when (seq author-list) (str "authors:: " author-list))
-         (when year              (str "year:: " year))
-         (when doi               (str "doi:: " doi))
-         (when url               (str "url:: " url))
-         (when citationCount     (str "citations:: " citationCount))
-         ""
-         "## Abstract"
-         ""
-         (or abstract "")
-         ""
-         "## Key Insights"
-         ""
-         "- "
-         ""
-         "## Methods"
-         ""
-         "- "
-         ""
-         "## Relevance to My Research"
-         ""
-         "- "]))))
-
-;; ---------------------------------------------------------------------------
-;; Import a paper as a structured page
-;; ---------------------------------------------------------------------------
-
-(defn import-paper-as-note!
-  "Creates a page for the paper and navigates to it."
-  [paper]
-  (let [title (paper->note-title paper)]
-    (-> (page-handler/<create! title {:redirect? true :edit? false})
-        (p/then (fn [page]
-                  (when page
-                    (notification/show! (t :research.paper/imported-success) :success))
-                  page))
-        (p/catch (fn [err]
-                   (notification/show! (str "Import failed: " (.-message err)) :error))))))
-
-;; ---------------------------------------------------------------------------
-;; Paper search view
-;; ---------------------------------------------------------------------------
-
-(hsx/defc paper-search
-  []
+(hsx/defc paper-search []
   (let [[query    set-query!]   (hooks/use-state "")
         [loading? set-loading?] (hooks/use-state false)
         [results  set-results!] (hooks/use-state nil)
         [error    set-error!]   (hooks/use-state nil)
+
         do-search! (fn []
-                     (when-not (string/blank? query)
+                     (when (seq (string/trim query))
                        (set-loading? true)
                        (set-error! nil)
                        (-> (search-papers! query)
                            (p/then (fn [papers]
-                                     (set-results! papers)
+                                     (set-results! (or papers []))
                                      (set-loading? false)))
                            (p/catch (fn [_]
-                                      (set-error! (t :research.paper/search-error))
+                                      (set-error! "Search failed. Check your connection.")
                                       (set-loading? false))))))]
-    [:div.paper-search.p-6.max-w-3xl.mx-auto
-     [:h1.text-2xl.font-bold.mb-1 (t :research/search-papers)]
-     [:p.text-muted-foreground.text-sm.mb-5 (t :research.paper/search-hint)]
+
+    [:div.paper-search
+     ;; Header
+     [:div.paper-search-header
+      [:h1.paper-search-title "Search Papers"]
+      [:p.paper-search-sub
+       "Search 200M+ papers from Semantic Scholar. Import any paper as a linked page in your graph."]]
 
      ;; Search bar
-     [:div.flex.gap-2.mb-6
-      [:input.flex-1.rounded-lg.border.border-input.bg-background.px-3.py-2.text-sm
+     [:div.paper-search-bar
+      [:input.paper-search-input
        {:type        "text"
-        :placeholder (t :research.paper/search-placeholder)
+        :placeholder "Search by title, author, topic, keywords…"
         :value       query
         :on-change   #(set-query! (.. % -target -value))
         :on-key-down #(when (= "Enter" (.-key %)) (do-search!))}]
       (shui/button
        {:on-click do-search!
-        :disabled loading?}
+        :disabled loading?
+        :class    "paper-search-btn gap-1.5"}
        (if loading?
-         (shui/tabler-icon "loader-2" {:class "animate-spin" :size 15})
-         (shui/tabler-icon "search" {:size 15 :class "mr-1.5"}))
-       (t :research.paper/search-btn))]
+         (shui/tabler-icon "loader-2" {:size 15 :class "animate-spin"})
+         (shui/tabler-icon "search" {:size 15}))
+       (if loading? "Searching…" "Search"))]
 
-     ;; Result states
+     ;; States
      (cond
        error
-       [:div.text-destructive.text-sm error]
+       [:div.paper-search-error error]
 
        (and (nil? results) (not loading?))
-       [:div.text-center.py-12.text-muted-foreground
-        (shui/tabler-icon "books" {:size 48 :class "mx-auto mb-3 opacity-30"})
-        [:p.text-sm (t :research.paper/search-empty-state)]]
+       [:div.paper-search-empty
+        (shui/tabler-icon "books" {:size 48 :class "paper-empty-icon"})
+        [:p "Search for papers to build your knowledge graph"]
+        [:p.paper-empty-hint "Imported papers appear as [[linked pages]] in your notes"]]
 
        (and results (empty? results))
-       [:div.text-center.py-12.text-muted-foreground
-        [:p.text-sm (t :research.paper/no-results)]]
+       [:div.paper-search-empty
+        [:p "No papers found — try different keywords"]]
 
        :else
-       [:div.flex.flex-col.gap-3
-        (for [paper results]
-          ^{:key (:paperId paper)}
-          [paper-card {:paper paper :on-import import-paper-as-note!}])])]))
+       [:div.paper-results-grid
+        (for [p results]
+          ^{:key (:paperId p)}
+          [paper-card {:paper p}])])]))

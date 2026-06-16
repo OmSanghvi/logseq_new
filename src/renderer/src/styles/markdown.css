@@ -1,0 +1,236 @@
+/* ---------- Reading view (rendered markdown) ---------- */
+.markdown-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.view-header {
+  height: 40px;
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--bg-modifier-border);
+  background: var(--bg-primary);
+}
+.view-title {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.view-mode-toggle {
+  display: flex;
+  gap: 2px;
+}
+
+.markdown-reading-view {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px max(48px, calc((100% - 750px) / 2));
+}
+.markdown-preview-sizer {
+  max-width: 750px;
+  margin: 0 auto;
+}
+
+/* base typography */
+.markdown-rendered {
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-normal);
+  user-select: text;
+}
+.markdown-rendered h1,
+.markdown-rendered h2,
+.markdown-rendered h3,
+.markdown-rendered h4,
+.markdown-rendered h5,
+.markdown-rendered h6 {
+  font-weight: 650;
+  line-height: 1.3;
+  margin: 1.2em 0 0.6em;
+}
+.markdown-rendered h1 {
+  font-size: 1.9em;
+}
+.markdown-rendered h2 {
+  font-size: 1.55em;
+}
+.markdown-rendered h3 {
+  font-size: 1.3em;
+}
+.markdown-rendered h4 {
+  font-size: 1.1em;
+}
+.markdown-rendered p {
+  margin: 0.6em 0;
+}
+.markdown-rendered ul,
+.markdown-rendered ol {
+  padding-left: 1.6em;
+  margin: 0.4em 0;
+}
+.markdown-rendered li {
+  margin: 0.2em 0;
+}
+.markdown-rendered a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.markdown-rendered a:hover {
+  text-decoration: underline;
+}
+.markdown-rendered hr {
+  border: none;
+  border-top: 1px solid var(--bg-modifier-border);
+  margin: 1.4em 0;
+}
+.markdown-rendered blockquote {
+  margin: 0.8em 0;
+  padding: 0.2em 1em;
+  border-left: 3px solid var(--bg-modifier-border-hover);
+  color: var(--text-muted);
+}
+.markdown-rendered code {
+  font-family: var(--font-editor);
+  font-size: 0.88em;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  color: #e5c07b;
+}
+.markdown-rendered pre {
+  background: #161616;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0.8em 0;
+}
+.markdown-rendered pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: 0.85em;
+}
+.markdown-rendered table {
+  border-collapse: collapse;
+  margin: 0.8em 0;
+  display: block;
+  overflow-x: auto;
+}
+.markdown-rendered th,
+.markdown-rendered td {
+  border: 1px solid var(--bg-modifier-border);
+  padding: 6px 12px;
+}
+.markdown-rendered th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+}
+.markdown-rendered img,
+.markdown-rendered .embed-img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin: 0.4em 0;
+}
+.markdown-rendered input[type='checkbox'] {
+  margin-right: 0.5em;
+  accent-color: var(--accent);
+}
+.markdown-rendered .math-block {
+  text-align: center;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+
+/* internal links + tags */
+.internal-link {
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.internal-link:hover {
+  text-decoration: underline;
+}
+.internal-link.is-unresolved {
+  color: #b06fb0;
+  opacity: 0.75;
+}
+.tag {
+  background: rgba(138, 92, 246, 0.15);
+  color: var(--accent-hover);
+  padding: 0.1em 0.5em;
+  border-radius: 10px;
+  font-size: 0.82em;
+  text-decoration: none;
+  cursor: pointer;
+}
+.embed-pdf {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+}
+
+/* callouts */
+.callout {
+  border-left: 4px solid var(--accent);
+  background: rgba(138, 92, 246, 0.08);
+  border-radius: 4px;
+  padding: 8px 14px;
+  margin: 0.8em 0;
+}
+.callout .callout-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.callout-warning,
+.callout-caution {
+  border-left-color: #e0a458;
+  background: rgba(224, 164, 88, 0.08);
+}
+.callout-danger,
+.callout-error,
+.callout-bug {
+  border-left-color: #e05858;
+  background: rgba(224, 88, 88, 0.08);
+}
+.callout-tip,
+.callout-success,
+.callout-info,
+.callout-note {
+  border-left-color: var(--accent);
+}
+
+/* ---------- Live-preview widgets in CodeMirror ---------- */
+.cm-internal-link {
+  color: var(--accent);
+  cursor: pointer;
+}
+.cm-internal-link:hover {
+  text-decoration: underline;
+}
+.cm-internal-link.is-unresolved {
+  color: #b06fb0;
+}
+.cm-task-checkbox {
+  accent-color: var(--accent);
+  cursor: pointer;
+  margin: 0 4px 0 0;
+  vertical-align: middle;
+}
+.cm-list-bullet {
+  color: var(--accent);
+  display: inline-block;
+  width: 1ch;
+  text-align: center;
+}
